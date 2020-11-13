@@ -35,13 +35,13 @@ public class BrandServiceImpl implements BrandService {
     public PmsBrand queryById(long id) {
         PmsBrandExample pmsBrandExample = new PmsBrandExample();
         pmsBrandExample.createCriteria().andIdEqualTo(id);
-        PmsBrand pmsBrand = brandMapper.selectByExample(pmsBrandExample).get(0);
-        redis.setObj(pmsBrand.getId()+"",pmsBrand);
-        if(id == 2){
-            PmsBrand obj = (PmsBrand) redis.getObj(id + "");
-            logger.info("从缓存中取出");
+        PmsBrand obj = (PmsBrand) redis.getObj(id + "");
+        //从缓存中取 如果取到了直接返回
+        if(obj!= null){
+            logger.info("从缓存中查询!!!");
             return obj;
         }
+        PmsBrand pmsBrand = brandMapper.selectByExample(pmsBrandExample).get(0);
         return pmsBrand;
     }
 
@@ -52,7 +52,7 @@ public class BrandServiceImpl implements BrandService {
     public Integer insertBrand(PmsBrand brand) {
         int insert = brandMapper.insert(brand);
         if(insert>0){
-            redis.setObj(insert+"",brand);
+            redis.setObj(brand.getId()+"",brand);
         }
         return insert;
     }
